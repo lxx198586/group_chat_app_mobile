@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      print(e); // TODO: show dialog with error
+      // print(e); // TODO: show dialog with error
     }
   }
 
@@ -89,7 +89,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${FirebaseAuth.instance.currentUser}'),
+        title: (FirebaseAuth.instance.currentUser.email == 'null')
+            ? Text('${FirebaseAuth.instance.currentUser.email}')
+            : Text('Anonymous'),
         actions: <Widget>[
           FlatButton(
             child: Text(
@@ -116,14 +118,17 @@ class HomePage extends StatelessWidget {
                 return Column(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatRoomList(
-                            name: homeListEach.name,
+                      onTap: () {
+                        // print(FirebaseAuth.instance.currentUser),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatRoomList(
+                              name: homeListEach.name,
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                       child: Stack(
                         children: [
                           Padding(

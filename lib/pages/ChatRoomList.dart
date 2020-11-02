@@ -1,30 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:random_color/random_color.dart';
 
 class DbListItem {
   String message;
   String timestamp;
 
-  DbListItem({this.message,this.timestamp});
+  DbListItem({this.message, this.timestamp});
 }
 
-
-
-class DbList{
+class DbList {
   List<DbListItem> dbList;
 
   DbList({this.dbList});
 }
 
-
-
 class ChatRoomList extends StatefulWidget {
-  String name;
-
+  final String name;
   ChatRoomList({this.name});
 
   @override
@@ -32,8 +26,34 @@ class ChatRoomList extends StatefulWidget {
 }
 
 class _ChatRoomListState extends State<ChatRoomList> {
-  final DBRef = FirebaseDatabase.instance.reference();
+  final DBRef = FirebaseFirestore.instance;
+  List<String> roomNameList = [];
+  List<DocumentSnapshot> documents = [];
+  List<Color> generatedColors = <Color>[];
+
+  // var totalRoomsNum = 0;
   TextEditingController roomController = new TextEditingController();
+
+  void getData() async {
+    roomNameList = [];
+    await DBRef.collection(widget.name).get().then((snapshot) {
+      snapshot.docs.forEach((doc) {
+        roomNameList.add(doc.id);
+        // print('0000000000000$roomNameList');
+      });
+    });
+    setState(() {
+      roomNameList = roomNameList;
+    });
+    // print('111111111111111$roomNameList');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    // print('222222222222222$roomNameList');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,36 +101,68 @@ class _ChatRoomListState extends State<ChatRoomList> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Container(
-                  child: Text("test test"),
+      body: Center(
+        child: Expanded(
+          child: RefreshIndicator(
+            onRefresh: getData,
+            child: ListView.builder(
+              physics: AlwaysScrollableScrollPhysics(),
+              itemCount: roomNameList.length,
+              itemBuilder: (context, index) {
+
+                // Generate random color for the leading icon
+                Color _color;
+                if (generatedColors.length > index) {
+                  _color = generatedColors[index];
+                } else {
+                  _color = RandomColor().randomColor();
+                  generatedColors.add(_color);
+                }
+
+                return ListTile(
+                  // onTap: () {},
+                  leading: Icon(
+                    Icons.chat_bubble,
+                    size: 30,
+                    color: _color,
+                  ),
+                  trailing: Icon(Icons.ac_unit),
+                  title: Text(
+                    roomNameList[index],
+                  ),
+                  subtitle: Text('aaa'),
                 );
               },
-              childCount: 1,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  void createRoom() {
+  void createRoom() async {
     var uuid = Uuid();
-    var timestamp = DateTime.now().toString();
+    var timestamp = DateTime.now();
     DBRef
             // choose the top room from the home page, 1 out of 15
-            .child(widget.name)
-        // create the personal room
-        .child(roomController.text)
+            .collection(widget.name)
+        // create the chat room
+        .doc(roomController.text)
         // create the message ID
-        .child(uuid.v1())
+        .collection(uuid.v1())
         // add a default first message
+        .doc()
         .set({
       'message': uuid.v1(),
+      'timestamp': timestamp,
+      // 'identifier': identifier,
+    });
+    DBRef
+            // choose the top room from the home page, 1 out of 15
+            .collection(widget.name)
+        // create the chat room
+        .doc(roomController.text)
+        .set({
       'timestamp': timestamp,
       // 'identifier': identifier,
     });
