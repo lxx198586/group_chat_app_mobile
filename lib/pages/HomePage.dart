@@ -31,64 +31,64 @@ class _HomePageState extends State<HomePage> {
 
   final List<HomeList> homeList = [
     HomeList(
-      imageUrl: 'assets/images/games.png',
-      name: 'Games',
+      imageUrl: 'assets/images/Anger.png',
+      name: 'Anger',
     ),
     HomeList(
-      imageUrl: 'assets/images/store.png',
-      name: 'Store',
+      imageUrl: 'assets/images/Contempt.png',
+      name: 'Contempt',
     ),
     HomeList(
-      imageUrl: 'assets/images/news.png',
-      name: 'News',
+      imageUrl: 'assets/images/Disgust.png',
+      name: 'Disgust',
     ),
     HomeList(
-      imageUrl: 'assets/images/stock.png',
-      name: 'Stock',
+      imageUrl: 'assets/images/Fear.png',
+      name: 'Fear',
     ),
     HomeList(
-      imageUrl: 'assets/images/skype.png',
-      name: 'Skype',
+      imageUrl: 'assets/images/Guilt.png',
+      name: 'Guilt',
     ),
     HomeList(
-      imageUrl: 'assets/images/games.png',
-      name: 'Games',
+      imageUrl: 'assets/images/Interest.png',
+      name: 'Interest',
     ),
     HomeList(
-      imageUrl: 'assets/images/store.png',
-      name: 'Store',
+      imageUrl: 'assets/images/Jealousy.png',
+      name: 'Jealousy',
     ),
     HomeList(
-      imageUrl: 'assets/images/news.png',
-      name: 'News',
+      imageUrl: 'assets/images/Joy.png',
+      name: 'Joy',
     ),
     HomeList(
-      imageUrl: 'assets/images/stock.png',
-      name: 'Stock',
+      imageUrl: 'assets/images/Loneliness.png',
+      name: 'Loneliness',
     ),
     HomeList(
-      imageUrl: 'assets/images/skype.png',
-      name: 'Skype',
+      imageUrl: 'assets/images/Sadness.png',
+      name: 'Sadness',
     ),
     HomeList(
-      imageUrl: 'assets/images/games.png',
-      name: 'Games',
+      imageUrl: 'assets/images/Self-Hostility.png',
+      name: 'Self-Hostility',
     ),
     HomeList(
-      imageUrl: 'assets/images/store.png',
-      name: 'Store',
+      imageUrl: 'assets/images/Shame.png',
+      name: 'Shame',
     ),
     HomeList(
-      imageUrl: 'assets/images/news.png',
-      name: 'News',
+      imageUrl: 'assets/images/Shyness.png',
+      name: 'Shyness',
     ),
     HomeList(
-      imageUrl: 'assets/images/stock.png',
-      name: 'Stock',
+      imageUrl: 'assets/images/Surprise.png',
+      name: 'Surprise',
     ),
     HomeList(
-      imageUrl: 'assets/images/skype.png',
-      name: 'Skype',
+      imageUrl: 'assets/images/Trust.png',
+      name: 'Trust',
     ),
   ];
 
