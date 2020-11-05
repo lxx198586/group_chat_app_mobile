@@ -13,12 +13,19 @@ class HomeList {
   });
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String displayName = '';
+
   Future<void> _signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      // print(e); // TODO: show dialog with error
+      print(e);
     }
   }
 
@@ -87,11 +94,26 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth.instance.authStateChanges().listen((User user) {
+      if (user == null) {
+        // print('User is currently signed out!');
+        // setState(() {
+        //   displayName = '';
+        // });
+      } else {
+        // print('User is signed in!');
+        (FirebaseAuth.instance.currentUser.isAnonymous == false)
+            ? displayName = FirebaseAuth.instance.currentUser.displayName
+            : displayName = 'Anonymous';
+        setState(() {
+          displayName = displayName;
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
-        title: (FirebaseAuth.instance.currentUser.email == 'null')
-            ? Text('${FirebaseAuth.instance.currentUser.email}')
-            : Text('Anonymous'),
+        title: Text(displayName),
         actions: <Widget>[
           FlatButton(
             child: Text(
@@ -101,8 +123,17 @@ class HomePage extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            onPressed: _signOut,
+            onPressed: () {
+              _signOut();
+            },
           ),
+          FlatButton(
+            onPressed: () {
+              print('${FirebaseAuth.instance.currentUser}');
+              print(displayName);
+            },
+            child: Icon(Icons.ac_unit),
+          )
         ],
       ),
       body: CustomScrollView(

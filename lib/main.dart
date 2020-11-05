@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'pages/FacilitatorSignUpPage.dart';
 import 'pages/HomePage.dart';
 import 'pages/FacilitatorSignInPage.dart';
@@ -19,8 +17,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: new ThemeData(
-        // scaffoldBackgroundColor: Colors.black,
-      ),
+          // scaffoldBackgroundColor: Colors.black,
+          ),
       home: LandingPage(),
     );
   }
@@ -44,7 +42,7 @@ class _LandingPageState extends State<LandingPage> {
 
   //Auto login if user previously logged in
   Future<User> getUser() async {
-    return await FirebaseAuth.instance.currentUser;
+    return FirebaseAuth.instance.currentUser;
   }
 
   @override
@@ -78,35 +76,51 @@ class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign in')),
-      body: Center(
-        child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            RaisedButton(
-              child: Text('Anonymous Sign in'),
-              onPressed: _signInAnonymously,
-            ),
-            RaisedButton(
-              child: Text('Facilitator Sign in'),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FacilitatorSignInPage()));
-              },
-            ),
-            RaisedButton(
-              child: Text('Facilitator Sign up'),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FacilitatorSignUpPage()));
-              },
-            ),
-          ],
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text('Sign in'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 50,
+              ),
+              RaisedButton(
+                child: Text('Anonymous Sign in'),
+                onPressed: _signInAnonymously,
+              ),
+              RaisedButton(
+                child: Text('Facilitator Sign in'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FacilitatorSignInPage()));
+                },
+              ),
+              RaisedButton(
+                child: Text('Facilitator Sign up'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FacilitatorSignUpPage()));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,19 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'ChatScreen.dart';
+
+bool validateEmail(String value) {
+  Pattern pattern =
+      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+  RegExp regex = new RegExp(pattern);
+  return (!regex.hasMatch(value)) ? false : true;
+}
 
 class FacilitatorSignUpPage extends StatefulWidget {
   @override
@@ -10,16 +24,23 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
   TextEditingController nameController = new TextEditingController();
-  TextEditingController experienceController = new TextEditingController();
+  File imageFile;
+  String imageUrl;
+
   final _formKey = GlobalKey<FormState>();
 
-  Future<User> _signUpFacilitator(email, password) async {
+  Future<void> _signUpFacilitator(email, password) async {
     User user;
+
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
+      );
 
+      await FirebaseAuth.instance.currentUser.updateProfile(
+        displayName: nameController.text,
+        photoURL: imageUrl,
       );
     } catch (e) {
       print(e);
@@ -30,6 +51,7 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
         // sign in failed
       }
     }
+    print(user);
   }
 
   @override
@@ -45,7 +67,8 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Email',
@@ -56,13 +79,18 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
                       validator: (value) {
                         if (value.isEmpty) {
                           return 'Please enter Email';
+                        } else if (!RegExp(
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(value)) {
+                          return 'Email is not valid';
                         }
                         return null;
                       },
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Password',
@@ -81,7 +109,8 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Name',
@@ -91,43 +120,45 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
                       // The validator receives the text that the user has entered.
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Please enter Email';
+                          return 'Please enter display name';
                         }
                         return null;
                       },
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Professional Experience',
-                        border: OutlineInputBorder(),
-                      ),
-                      controller: experienceController,
-                      // The validator receives the text that the user has entered.
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter Email';
-                        }
-                        return null;
-                      },
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
+                    child: Column(
+                      children: [
+                        RaisedButton(
+                          onPressed: getImage,
+                          child: Text('Upload Image'),
+                        ),
+                        imageFile == null
+                            ? Text('')
+                            : Center(
+                                child: SizedBox(
+                                    height: 30,
+                                    width: 300,
+                                    child: Text(
+                                      imageFile.toString(),
+                                      overflow: TextOverflow.fade,
+                                    )),
+                              ),
+                      ],
                     ),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      _signUpFacilitator(emailController, passwordController);
-                      print(
-                          '${passwordController.text}--------------${emailController.text}');
-                      // Validate returns true if the form is valid, otherwise false.
                       if (_formKey.currentState.validate()) {
-                        // If the form is valid, display a snackbar. In the real world,
-                        // you'd often call a server or save the information in a database.
-
-                        // Scaffold.of(context)
-                        //     .showSnackBar(SnackBar(content: Text('Processing Data')));
+                        return {
+                          _signUpFacilitator(
+                              emailController, passwordController),
+                          uploadFile(),
+                          Navigator.pop(context),
+                        };
                       }
-                      Navigator.pop(context);
                     },
                     child: Text('Sign Up'),
                   ),
@@ -138,5 +169,41 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
         ),
       ),
     );
+  }
+
+  Future getImage() async {
+    ImagePicker imagePicker = ImagePicker();
+    PickedFile pickedFile;
+
+    pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
+    imageFile = File(pickedFile.path);
+
+    if (imageFile != null) {
+      setState(() {
+        imageFile = imageFile;
+      });
+      uploadFile();
+      // print('-----------------------------$imageFile');
+    }
+  }
+
+  Future uploadFile() async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    StorageReference reference =
+        FirebaseStorage.instance.ref().child('users/$fileName');
+    StorageUploadTask uploadTask = reference.putFile(imageFile);
+    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
+      imageUrl = downloadUrl;
+      setState(() {
+        imageUrl = imageUrl;
+      });
+    }, onError: (err) {
+      // setState(() {
+      //   isLoading = false;
+      // });
+      Fluttertoast.showToast(msg: 'This file is not an image');
+    });
+    print(imageUrl);
   }
 }

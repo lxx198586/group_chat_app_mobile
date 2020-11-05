@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:group_chat_app_mobile/pages/ChatScreen.dart';
 import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_color/random_color.dart';
+import 'dart:math' as math;
 
 class DbListItem {
   String message;
@@ -19,6 +22,8 @@ class DbList {
 
 class ChatRoomList extends StatefulWidget {
   final String name;
+  final String _timestamp = '';
+
   ChatRoomList({this.name});
 
   @override
@@ -28,17 +33,29 @@ class ChatRoomList extends StatefulWidget {
 class _ChatRoomListState extends State<ChatRoomList> {
   final DBRef = FirebaseFirestore.instance;
   List<String> roomNameList = [];
-  List<DocumentSnapshot> documents = [];
+  List<String> subtitleList = [];
   List<Color> generatedColors = <Color>[];
+  String _timestamp = '';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // var totalRoomsNum = 0;
   TextEditingController roomController = new TextEditingController();
 
-  void getData() async {
+  Future<void> getData() async {
     roomNameList = [];
-    await DBRef.collection(widget.name).get().then((snapshot) {
+    await DBRef.collection(widget.name)
+        .orderBy("timestamp", descending: true)
+        .get()
+        .then((snapshot) {
       snapshot.docs.forEach((doc) {
         roomNameList.add(doc.id);
+
+        Timestamp t = doc.data()['timestamp'];
+        DateTime d = t.toDate();
+        _timestamp = d.toString();
+        _timestamp = _timestamp.substring(0, 10);
+
+        subtitleList.add(_timestamp);
         // print('0000000000000$roomNameList');
       });
     });
@@ -62,36 +79,49 @@ class _ChatRoomListState extends State<ChatRoomList> {
         actions: [
           FlatButton(
             onPressed: () {
+              // print(roomNameList);
               showDialog(
                 context: context,
-                builder: (_) => new Dialog(
+                builder: (_) => Dialog(
                   child: SizedBox(
                     height: 150,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 10),
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Room Name',
-                              border: OutlineInputBorder(),
+                    child: new Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 10),
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Room Name',
+                                border: OutlineInputBorder(),
+                              ),
+                              controller: roomController,
+                              // The validator receives the text that the user has entered.
+                              validator: (String value) {
+                                if (value.isEmpty) {
+                                  return 'Please create room name';
+                                } else if (roomNameList.contains(value)) {
+                                  return 'Room Existed';
+                                }
+                                return null;
+                              },
                             ),
-                            controller: roomController,
-                            // The validator receives the text that the user has entered.
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please create room name';
-                              }
-                              return null;
-                            },
                           ),
-                        ),
-                        RaisedButton(
-                          onPressed: createRoom,
-                          child: Text('Create Room'),
-                        ),
-                      ],
+                          RaisedButton(
+                            onPressed: () {
+                              if (_formKey.currentState.validate()) {
+                                return {
+                                  createRoom(),
+                                  getData(),
+                                };
+                              }
+                            },
+                            child: Text('Create Room'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -102,38 +132,55 @@ class _ChatRoomListState extends State<ChatRoomList> {
         ],
       ),
       body: Center(
-        child: Expanded(
-          child: RefreshIndicator(
-            onRefresh: getData,
-            child: ListView.builder(
-              physics: AlwaysScrollableScrollPhysics(),
-              itemCount: roomNameList.length,
-              itemBuilder: (context, index) {
+        child: RefreshIndicator(
+          onRefresh: getData,
+          child: ListView.builder(
+            physics: AlwaysScrollableScrollPhysics(),
+            itemCount: roomNameList.length,
+            itemBuilder: (context, index) {
+              // Generate random color for the leading icon
+              Color _color;
+              if (generatedColors.length > index) {
+                _color = generatedColors[index];
+              } else {
+                _color = RandomColor().randomColor();
+                generatedColors.add(_color);
+              }
 
-                // Generate random color for the leading icon
-                Color _color;
-                if (generatedColors.length > index) {
-                  _color = generatedColors[index];
-                } else {
-                  _color = RandomColor().randomColor();
-                  generatedColors.add(_color);
-                }
-
-                return ListTile(
-                  // onTap: () {},
-                  leading: Icon(
+              return ListTile(
+                leading: Icon(
+                  Icons.chat_bubble,
+                  size: 30,
+                  color: _color,
+                ),
+                trailing: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: Icon(
                     Icons.chat_bubble,
                     size: 30,
                     color: _color,
                   ),
-                  trailing: Icon(Icons.ac_unit),
-                  title: Text(
-                    roomNameList[index],
-                  ),
-                  subtitle: Text('aaa'),
-                );
-              },
-            ),
+                ),
+                title: Text(
+                  roomNameList[index],
+                ),
+                subtitle: Text(
+                  subtitleList[index],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        roomCollection: widget.name,
+                        roomDoc: roomNameList[index],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),
@@ -143,19 +190,27 @@ class _ChatRoomListState extends State<ChatRoomList> {
   void createRoom() async {
     var uuid = Uuid();
     var timestamp = DateTime.now();
+    String isAnonymous;
+
+    FirebaseAuth.instance.currentUser.isAnonymous == true
+        ? isAnonymous = 'isAnonymous'
+        : isAnonymous = 'notAnonymous';
+
     DBRef
             // choose the top room from the home page, 1 out of 15
             .collection(widget.name)
         // create the chat room
         .doc(roomController.text)
         // create the message ID
-        .collection(uuid.v1())
+        .collection('messages')
         // add a default first message
-        .doc()
+        .doc('first message')
         .set({
-      'message': uuid.v1(),
+      'message': 'Hello Everyone',
       'timestamp': timestamp,
-      // 'identifier': identifier,
+      'isAnonymous': isAnonymous,
+      'type': 0,
+      'photoURL': FirebaseAuth.instance.currentUser.photoURL,
     });
     DBRef
             // choose the top room from the home page, 1 out of 15
@@ -167,6 +222,6 @@ class _ChatRoomListState extends State<ChatRoomList> {
       // 'identifier': identifier,
     });
     Navigator.of(context).pop();
-    print(timestamp);
+    // print(timestamp);
   }
 }
