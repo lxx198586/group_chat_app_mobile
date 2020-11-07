@@ -10,13 +10,11 @@ import 'dart:math' as math;
 class DbListItem {
   String message;
   String timestamp;
-
   DbListItem({this.message, this.timestamp});
 }
 
 class DbList {
   List<DbListItem> dbList;
-
   DbList({this.dbList});
 }
 
@@ -43,20 +41,24 @@ class _ChatRoomListState extends State<ChatRoomList> {
 
   Future<void> getData() async {
     roomNameList = [];
+    final startAtTimestamp = Timestamp.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch - 86400000);
+    print(startAtTimestamp.toDate());
     await DBRef.collection(widget.name)
-        .orderBy("timestamp", descending: true)
+        .orderBy("timestamp", descending: true).endBefore([startAtTimestamp])
         .get()
         .then((snapshot) {
       snapshot.docs.forEach((doc) {
         roomNameList.add(doc.id);
 
         Timestamp t = doc.data()['timestamp'];
+        // print(t);
         DateTime d = t.toDate();
+        // print(d);
         _timestamp = d.toString();
-        _timestamp = _timestamp.substring(0, 10);
+        _timestamp = _timestamp.substring(0, 19);
 
         subtitleList.add(_timestamp);
-        // print('0000000000000$roomNameList');
+        // print('0000000000000$subtitleList');
       });
     });
     setState(() {
@@ -166,7 +168,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
                   roomNameList[index],
                 ),
                 subtitle: Text(
-                  subtitleList[index],
+                  '${subtitleList[index]} UTC',
                 ),
                 onTap: () {
                   Navigator.push(
@@ -206,7 +208,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
         // add a default first message
         .doc('first message')
         .set({
-      'message': 'Hello Everyone',
+      'message': 'Chat room will last 24 hours.',
       'timestamp': timestamp,
       'isAnonymous': isAnonymous,
       'type': 0,

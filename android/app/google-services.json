@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:150190157105:android:609924dfdbb6197fd05410",
+        "mobilesdk_app_id": "1:150190157105:android:9e3df912a2b7ea4dd05410",
         "android_client_info": {
-          "package_name": "com.example.group_chat_app_mobile"
+          "package_name": "group_chat_app_mobile.virtualworld"
         }
       },
       "oauth_client": [

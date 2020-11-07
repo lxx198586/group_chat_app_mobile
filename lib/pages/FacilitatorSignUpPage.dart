@@ -121,6 +121,8 @@ class _FacilitatorSignUpPageState extends State<FacilitatorSignUpPage> {
                       validator: (value) {
                         if (value.isEmpty) {
                           return 'Please enter display name';
+                        } else if (value.length < 4) {
+                          return 'Display name at least 4 letters';
                         }
                         return null;
                       },

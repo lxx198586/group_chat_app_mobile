@@ -1,4 +1,4 @@
-package com.example.group_chat_app_mobile;
+package group_chat_app_mobile.virtualworld;
 
 import io.flutter.embedding.android.FlutterActivity;
 

@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String displayName = '';
+  String displayName = 'Anonymous';
 
   Future<void> _signOut() async {
     try {
@@ -93,27 +93,30 @@ class _HomePageState extends State<HomePage> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    FirebaseAuth.instance.authStateChanges().listen((User user) {
+  void initState() {
+    super.initState();
+    FirebaseAuth.instance.userChanges().listen((User user) {
       if (user == null) {
-        // print('User is currently signed out!');
-        // setState(() {
-        //   displayName = '';
-        // });
       } else {
-        // print('User is signed in!');
-        (FirebaseAuth.instance.currentUser.isAnonymous == false)
-            ? displayName = FirebaseAuth.instance.currentUser.displayName
+        (FirebaseAuth.instance.currentUser.isAnonymous == false && mounted)
+            ? setState(() {
+                displayName = FirebaseAuth.instance.currentUser.displayName;
+              })
             : displayName = 'Anonymous';
-        setState(() {
-          displayName = displayName;
-        });
       }
     });
+  }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(displayName),
+        title: displayName == null ? Text('Anonymous') : Text(displayName),
         actions: <Widget>[
           FlatButton(
             child: Text(
@@ -127,13 +130,13 @@ class _HomePageState extends State<HomePage> {
               _signOut();
             },
           ),
-          FlatButton(
-            onPressed: () {
-              print('${FirebaseAuth.instance.currentUser}');
-              print(displayName);
-            },
-            child: Icon(Icons.ac_unit),
-          )
+          // FlatButton(
+          //   onPressed: () {
+          //     print('${FirebaseAuth.instance.currentUser}');
+          //     print(displayName);
+          //   },
+          //   child: Icon(Icons.ac_unit),
+          // )
         ],
       ),
       body: CustomScrollView(
