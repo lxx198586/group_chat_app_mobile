@@ -7,7 +7,6 @@ class FacilitatorSignInPage extends StatefulWidget {
 }
 
 class _FacilitatorSignInPageState extends State<FacilitatorSignInPage> {
-
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -27,7 +26,6 @@ class _FacilitatorSignInPageState extends State<FacilitatorSignInPage> {
         print('user');
         // sign in successful
       } else {
-
         // sign in failed
       }
     }
@@ -46,7 +44,8 @@ class _FacilitatorSignInPageState extends State<FacilitatorSignInPage> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Email',
@@ -63,7 +62,8 @@ class _FacilitatorSignInPageState extends State<FacilitatorSignInPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 10),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Password',
@@ -83,9 +83,13 @@ class _FacilitatorSignInPageState extends State<FacilitatorSignInPage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      _signInFacilitator(emailController, passwordController);
-                      Navigator.pop(context);
-
+                      if (_formKey.currentState.validate()) {
+                        return {
+                          _signInFacilitator(
+                              emailController, passwordController),
+                          Navigator.pop(context),
+                        };
+                      }
                     },
                     child: Text('Sign In'),
                   ),

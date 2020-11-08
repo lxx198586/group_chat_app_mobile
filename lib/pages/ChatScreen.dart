@@ -131,31 +131,31 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget buildInput() {
-    return Container(
-      child: Row(
-        children: <Widget>[
-          // Button send image
-          Material(
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
-              child: IconButton(
-                icon: Icon(Icons.image),
-                onPressed: getImage,
-                color: Colors.pink,
-              ),
-            ),
-            color: Colors.white,
-          ),
-        ],
-      ),
-      width: double.infinity,
-      height: 50.0,
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
-          color: Colors.white),
-    );
-  }
+  // Widget buildInput() {
+  //   return Container(
+  //     child: Row(
+  //       children: <Widget>[
+  //         // Button send image
+  //         Material(
+  //           child: Container(
+  //             margin: EdgeInsets.symmetric(horizontal: 1.0),
+  //             child: IconButton(
+  //               icon: Icon(Icons.image),
+  //               onPressed: getImage,
+  //               color: Colors.pink,
+  //             ),
+  //           ),
+  //           color: Colors.white,
+  //         ),
+  //       ],
+  //     ),
+  //     width: double.infinity,
+  //     height: 50.0,
+  //     decoration: BoxDecoration(
+  //         border: Border(top: BorderSide(color: Colors.grey, width: 0.5)),
+  //         color: Colors.white),
+  //   );
+  // }
 
   Future getImage() async {
     ImagePicker imagePicker = ImagePicker();

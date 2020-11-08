@@ -130,13 +130,6 @@ class _HomePageState extends State<HomePage> {
               _signOut();
             },
           ),
-          // FlatButton(
-          //   onPressed: () {
-          //     print('${FirebaseAuth.instance.currentUser}');
-          //     print(displayName);
-          //   },
-          //   child: Icon(Icons.ac_unit),
-          // )
         ],
       ),
       body: CustomScrollView(
